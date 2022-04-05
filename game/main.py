@@ -1,5 +1,6 @@
-from glob import glob
-import pygame, sys, random
+from tkinter.tix import Tree
+from numpy import False_
+import pygame, sys, random, time
 from actors import Bullet, Enemy, Player, Knife
 
 pygame.init()
@@ -20,6 +21,7 @@ hero_image = pygame.image.load('./assets/Mid.png')
 
 #enemy movement
 enemy_walkLeft = [pygame.image.load('./assets/enemy/L1E.png'),pygame.image.load('./assets/enemy/L2E.png'),pygame.image.load('./assets/enemy/L3E.png'),pygame.image.load('./assets/enemy/L4E.png'),pygame.image.load('./assets/enemy/L5E.png'),pygame.image.load('./assets/enemy/L6E.png'),pygame.image.load('./assets/enemy/L7E.png'),pygame.image.load('./assets/enemy/L8E.png'),]
+enemy_walkRight = [pygame.image.load('./assets/enemy/R1E.png'),pygame.image.load('./assets/enemy/R2E.png'),pygame.image.load('./assets/enemy/R3E.png'),pygame.image.load('./assets/enemy/R4E.png'),pygame.image.load('./assets/enemy/R5E.png'),pygame.image.load('./assets/enemy/R6E.png'),pygame.image.load('./assets/enemy/R7E.png'),pygame.image.load('./assets/enemy/R8E.png'),]
 
 clock = pygame.time.Clock()
 
@@ -35,6 +37,7 @@ for i in range(8):
 a=0
 for i in range(8):
     enemy_walkLeft[a] = pygame.transform.scale(enemy_walkLeft[a], (128,128)) 
+    enemy_walkRight[a] = pygame.transform.scale(enemy_walkRight[a], (128,128)) 
     a += 1
 
 hero_image = pygame.transform.scale(hero_image, (128,128))
@@ -70,7 +73,10 @@ def enemy_draw():
     if enemy.left:
         win.blit(enemy_walkLeft[enemy.walkCt//8], (enemy.x, enemy.y))
         enemy.walkCt += 1
-
+    elif enemy.right:
+        win.blit(enemy_walkRight[enemy.walkCt//8], (enemy.x, enemy.y))
+        enemy.walkCt += 1
+        
 #knife draw wich of on air
 def knife_draw():
     pygame.draw.rect(win, knife.color, (knife.x, knife.y, knife.width, knife.height))
@@ -110,7 +116,7 @@ knife = Knife(random_x, 0, 10, 32)
 
 #game loop
 hero = Player(50, 500, 128, 128)
-enemy = Enemy(1000, 500, 128,128)
+enemy = Enemy(600, 500, 128,128)
 bullets = []
 game = True
 while game:
@@ -127,7 +133,6 @@ while game:
         else:
             bullets.pop(bullets.index(bullet))
 
-
     keys = pygame.key.get_pressed()
  
     if keys[pygame.K_q]:          
@@ -138,7 +143,7 @@ while game:
         if len(bullets) < 3:
             if len(bullets) < 1 :
                 bullets.append(Bullet(round(hero.x + hero.width // 2), round(hero.y + hero.height // 2), 6, (0,0,0), direction))
-            
+                
     
     if keys[pygame.K_LEFT] and hero.x > 0:
         hero.x -= hero.velocity     # the top and left coordinate is (0,0), if going right; x increase, if going bottom y increase
@@ -181,9 +186,19 @@ while game:
     
     #dying
 
-    
-    #movement enemy
-    enemy.x -= enemy.velocity
+        
+    if enemy.x >= 800:
+        enemy.left = True
+        enemy.right = False
+    if enemy.x <= 300:
+        enemy.right = True
+        enemy.left = False
+
+    if enemy.left:
+        enemy.x -= enemy.velocity
+    else:
+        enemy.x += enemy.velocity
+
 
     re_drawGameWindow()    
     

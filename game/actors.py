@@ -31,6 +31,7 @@ class Enemy(object):
         self.velocity = 3
         self.walkCt = 0
         self.left = True
+        self.right = False
         
 class Bullet(object):
     def __init__(self, x, y, radius, color, direction):
@@ -39,4 +40,4 @@ class Bullet(object):
         self.radius = radius
         self.color = color
         self.direction = direction
-        self.velocity = 8
+        self.velocity = 10
