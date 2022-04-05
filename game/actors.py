@@ -1,4 +1,3 @@
-
 class Player(object):
     def __init__(self, x, y, width, height):
         self.x = x
@@ -29,6 +28,15 @@ class Enemy(object):
         self.y = y
         self.width = width
         self.height = height
-        self.velocity = 5
+        self.velocity = 3
         self.walkCt = 0
-        self.left = True  
+        self.left = True
+        
+class Bullet(object):
+    def __init__(self, x, y, radius, color, direction):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.direction = direction
+        self.velocity = 8

@@ -1,5 +1,6 @@
+from glob import glob
 import pygame, sys, random
-from actors import Enemy, Player, Knife
+from actors import Bullet, Enemy, Player, Knife
 
 pygame.init()
 
@@ -70,14 +71,23 @@ def enemy_draw():
         win.blit(enemy_walkLeft[enemy.walkCt//8], (enemy.x, enemy.y))
         enemy.walkCt += 1
 
+#knife draw wich of on air
+def knife_draw():
+    pygame.draw.rect(win, knife.color, (knife.x, knife.y, knife.width, knife.height))
+
+#draw bullet
+def draw_bullet():
+    global win
+    for bullet in bullets:
+        pygame.draw.circle(win, bullet.color, (bullet.x, bullet.y), bullet.radius)    
+
 #main draw func
 def re_drawGameWindow():        
     win.blit(bg_image, (0,0))
     hero_draw()
     enemy_draw()
-    
-    #knife on air
-    pygame.draw.rect(win, knife.color, (knife.x, knife.y, knife.width, knife.height))
+    knife_draw() 
+    draw_bullet()
     
     #scoreboard
     font = pygame.font.Font('freesansbold.ttf', 24)
@@ -101,15 +111,34 @@ knife = Knife(random_x, 0, 10, 32)
 #game loop
 hero = Player(50, 500, 128, 128)
 enemy = Enemy(1000, 500, 128,128)
+bullets = []
 game = True
 while game:
     clock.tick(64) # frame (mean: how many images use per second)
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game = False
 
+    #bullet movement
+    for bullet in bullets:
+        if bullet.x < WIN_WIDTH and bullet.x > 0:
+            bullet.x += bullet.velocity * bullet.direction
+        else:
+            bullets.pop(bullets.index(bullet))
+
+
     keys = pygame.key.get_pressed()
+ 
+    if keys[pygame.K_q]:          
+        if hero.lastKey == "right":
+            direction = 1
+        else:
+            direction = -1
+        if len(bullets) < 3:
+            if len(bullets) < 1 :
+                bullets.append(Bullet(round(hero.x + hero.width // 2), round(hero.y + hero.height // 2), 6, (0,0,0), direction))
+            
     
     if keys[pygame.K_LEFT] and hero.x > 0:
         hero.x -= hero.velocity     # the top and left coordinate is (0,0), if going right; x increase, if going bottom y increase
@@ -149,6 +178,9 @@ while game:
         random_x = random.randint(0,WIN_WIDTH)
         knife = Knife(random_x, 0, 10, 32)
     knife.y += knife.velocity #moving knife
+    
+    #dying
+
     
     #movement enemy
     enemy.x -= enemy.velocity
