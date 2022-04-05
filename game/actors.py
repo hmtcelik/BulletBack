@@ -1,5 +1,3 @@
-from turtle import right
-
 
 class Player(object):
     def __init__(self, x, y, width, height):
@@ -22,5 +20,15 @@ class Knife(object):
         self.y = y
         self.width = width
         self.height = height
-        self.velocity = 7
+        self.velocity = 10
         self.color = (0,0,0)
+
+class Enemy(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.velocity = 5
+        self.walkCt = 0
+        self.left = True  

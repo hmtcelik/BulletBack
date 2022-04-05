@@ -1,5 +1,5 @@
 import pygame, sys, random
-from actors import Player, Knife
+from actors import Enemy, Player, Knife
 
 pygame.init()
 
@@ -17,6 +17,9 @@ idleLeft = [pygame.image.load('./assets/LIdle1.png'),pygame.image.load('./assets
 bg_image = pygame.image.load('./assets/bg.jpg')
 hero_image = pygame.image.load('./assets/Mid.png')
 
+#enemy movement
+enemy_walkLeft = [pygame.image.load('./assets/enemy/L1E.png'),pygame.image.load('./assets/enemy/L2E.png'),pygame.image.load('./assets/enemy/L3E.png'),pygame.image.load('./assets/enemy/L4E.png'),pygame.image.load('./assets/enemy/L5E.png'),pygame.image.load('./assets/enemy/L6E.png'),pygame.image.load('./assets/enemy/L7E.png'),pygame.image.load('./assets/enemy/L8E.png'),]
+
 clock = pygame.time.Clock()
 
 a=0
@@ -28,13 +31,17 @@ for i in range(8):
     idleLeft[a] = pygame.transform.scale(idleLeft[a], (128,128))
     a += 1
 
+a=0
+for i in range(8):
+    enemy_walkLeft[a] = pygame.transform.scale(enemy_walkLeft[a], (128,128)) 
+    a += 1
+
 hero_image = pygame.transform.scale(hero_image, (128,128))
 
-def re_drawGameWindow():        
-    win.blit(bg_image, (0,0))
-
-    #walking hero
-    if hero.walkCt +1 >= 64: # because we have 9 spirite images each movement and want to use each image on 3 frame (9*3=27)
+#drawing hero movements
+def hero_draw():
+    global win
+    if hero.walkCt +1 >= 64: # because we have 8 spirite images each movement and want to use each image on 8 frame (8*8=64)
         hero.walkCt = 0
     if hero.idleCt +1 >= 64:
         hero.idleCt = 0
@@ -52,6 +59,22 @@ def re_drawGameWindow():
         else:
             win.blit(idleLeft[hero.idleCt//8], (hero.x, hero.y))
             hero.idleCt += 1
+            
+#drawing enemy movements
+def enemy_draw():
+    global win
+    if enemy.walkCt +1 >= 64:
+        enemy.walkCt = 0
+    
+    if enemy.left:
+        win.blit(enemy_walkLeft[enemy.walkCt//8], (enemy.x, enemy.y))
+        enemy.walkCt += 1
+
+#main draw func
+def re_drawGameWindow():        
+    win.blit(bg_image, (0,0))
+    hero_draw()
+    enemy_draw()
     
     #knife on air
     pygame.draw.rect(win, knife.color, (knife.x, knife.y, knife.width, knife.height))
@@ -77,6 +100,7 @@ knife = Knife(random_x, 0, 10, 32)
 
 #game loop
 hero = Player(50, 500, 128, 128)
+enemy = Enemy(1000, 500, 128,128)
 game = True
 while game:
     clock.tick(64) # frame (mean: how many images use per second)
@@ -102,8 +126,6 @@ while game:
         hero.right = False
         hero.walkCt = 0
     
-    if keys[pygame.K_w]:
-        hero.y -= hero.velocity
     if not hero.isAir:
         if keys[pygame.K_UP] and hero.y > 0:
             hero.isAir = True
@@ -111,18 +133,25 @@ while game:
             hero.right = False
             hero.walkCt = 0
     elif hero.isAir:
-        if hero.airCount >= -10: 
-            hero.y -= (hero.airCount * 3)
+        if hero.airCount >= -10:
+            if hero.airCount > 0:
+                negative = 1
+            else:
+                negative = -1
+            hero.y -= (hero.airCount ** 2) / 2 * negative  # momentum of jump
             hero.airCount -= 1
         else:
             hero.isAir = False
             hero.airCount = 10
             
     #droping knife on air
-    if knife.y > WIN_HEGIHT:  
+    if knife.y > 570:  
         random_x = random.randint(0,WIN_WIDTH)
         knife = Knife(random_x, 0, 10, 32)
     knife.y += knife.velocity #moving knife
+    
+    #movement enemy
+    enemy.x -= enemy.velocity
 
     re_drawGameWindow()    
     
