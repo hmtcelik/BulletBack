@@ -13,6 +13,8 @@ class Player(object):
         self.idleCt = 0
         self.lastKey = "right"
         self.hitbox = (self.x + 35, self.y, 56, 120)
+        self.reloading = 0
+        self.reloading_visible = False
     
     def hit_knife(self):
         print("I am dead")

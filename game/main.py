@@ -1,3 +1,4 @@
+from numpy import true_divide
 import pygame, sys, random, time
 from classes import Bullet, Enemy, Player, Knife
 
@@ -43,6 +44,9 @@ hero_image = pygame.transform.scale(hero_image, (128,128))
 
 knife_img = pygame.transform.rotate(knife_img, 45)
 
+#score
+score = 0
+
 #drawing hero movements
 def hero_draw():
     global win
@@ -67,6 +71,10 @@ def hero_draw():
     
     hero.hitbox = (hero.x + 35, hero.y, 56, 120)
     pygame.draw.rect(win, (255, 0, 0), (hero.hitbox), 2)
+    if hero.reloading_visible:
+        pygame.draw.rect(win, (0, 255, 0), (hero.hitbox[0], hero.hitbox[1]-20, 50, 10), 10)
+        pygame.draw.rect(win, (0, 150, 0), (hero.hitbox[0], hero.hitbox[1]-20, hero.reloading, 10), 10)
+
 
 #drawing enemy movements
 def enemy_draw():
@@ -108,7 +116,7 @@ def re_drawGameWindow():
     
     #scoreboard
     font = pygame.font.Font('freesansbold.ttf', 24)
-    score_text = font.render("Score: 0",True,(0,0,0))
+    score_text = font.render("Score: "+ str(score), True, (0,0,0))
     win.blit(score_text,(10,10))
     
     pygame.display.update()
@@ -129,7 +137,6 @@ knife = Knife(random_x, 0, 10, 32)
 hero = Player(50, 500, 128, 128)
 enemy = Enemy(600, 500, 128,128)
 bullets = []
-shootCt = 0
 game = True
 while game:
     clock.tick(64) # frame (mean: how many images use per second)
@@ -139,16 +146,19 @@ while game:
             game = False
 
     #shoot timer (just blocking spamming shoot)
-    if shootCt > 0:
-        shootCt +=1
-    if shootCt > 60:
-        shootCt = 0
+    if hero.reloading > 0:
+        hero.reloading +=1
+    if hero.reloading > 50:
+        hero.reloading_visible = False
+        hero.reloading = 0
+        
         
     #bullet movement
     for bullet in bullets:
         if bullet.y - bullet.radius < enemy.hitbox[1] + enemy.hitbox[3] and bullet.y + bullet.radius > enemy.hitbox[1]:
             if bullet.x + bullet.radius > enemy.hitbox[0] and bullet.x - bullet.radius < enemy.hitbox[0] + enemy.hitbox[2]:
                 enemy.hit()
+                score += 1
                 bullets.pop(bullets.index(bullet))
                 
         
@@ -159,15 +169,17 @@ while game:
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_q] and shootCt == 0:          
+    if keys[pygame.K_q] and hero.reloading == 0:          
         if hero.lastKey == "right":
             direction = 1
         else:
             direction = -1
         if len(bullets) < 3:
             bullets.append(Bullet(round(hero.x + hero.width // 2), round(hero.y + hero.height // 2), 6, (0,0,0), direction))
-          
-        shootCt = 1
+        
+        hero.reloading_visible = True  
+        hero.reloading = 1
+        
     
     if keys[pygame.K_LEFT] and hero.x > 0:
         hero.x -= hero.velocity     # the top and left coordinate is (0,0), if going right; x increase, if going bottom y increase
