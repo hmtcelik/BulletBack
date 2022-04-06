@@ -1,4 +1,3 @@
-from numpy import true_divide
 import pygame, sys, random, time
 from classes import Bullet, Enemy, Player, Knife
 
@@ -25,6 +24,7 @@ enemy_walkRight = [pygame.image.load('./assets/enemy/R1E.png'),pygame.image.load
 
 clock = pygame.time.Clock()
 
+
 a=0
 #transform images
 for i in range(8):
@@ -44,9 +44,65 @@ hero_image = pygame.transform.scale(hero_image, (128,128))
 
 knife_img = pygame.transform.rotate(knife_img, 45)
 
+#importing sfx and soundtracks
+'''
+#music
+music_file = './sfx/test.mp3'
+pygame.mixer.init()
+pygame.mixer.music.load(music_file)
+pygame.mixer.music.play(-1) # -1 mean loop indefinetly
+'''
+shootsfx = pygame.mixer.Sound('./sfx/shoot.wav')
+hitsfx = pygame.mixer.Sound('./sfx/hit.wav')
+deadsfx = pygame.mixer.Sound('./sfx/dead.wav')
+
 #score
 score = 0
 
+#restart the game
+def player_dead():
+    global win, score, game_timer, enemy_creation_time, create_reset_time, right_or_left
+    hero.x = WIN_WIDTH/2 - hero.width /2
+    hero.y = 500
+    hero.walkCt = 0
+    score_font = pygame.font.Font('freesansbold.ttf', 60) 
+    score_text_on_restart = score_font.render("Your Score: " + str(score), True, (0,0,0))
+    win.blit(score_text_on_restart, ((WIN_WIDTH /2)-(score_text_on_restart.get_width()/2), 200 )) #(x,y) 
+    i = 0
+    enemies.clear()
+    bullets.clear()
+    knife.y = 0
+    game_timer = 0
+    enemy_creation_time = 0
+    create_reset_time = 100
+    right_or_left = 0
+    while True: #changing color press R text 
+        if i > 0 and i < 200:
+            restart_font = pygame.font.Font('freesansbold.ttf', 30)
+            restart_text = restart_font.render("Press 'R' to restart", True, (0,0,0))
+            win.blit(restart_text, ((WIN_WIDTH /2)-(restart_text.get_width()/2), 270 )) #(x,y)
+        else:
+            restart_font = pygame.font.Font('freesansbold.ttf', 30)
+            restart_text = restart_font.render("Press 'R' to restart", True, (255,255,255))
+            win.blit(restart_text, ((WIN_WIDTH /2)-(restart_text.get_width()/2), 270 )) #(x,y)
+            
+        i += 1
+        if i == 400: # changing white and black on PRESS R text
+            i = 0 
+        pygame.display.update()
+        score = 0
+        
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+                    
+        keys1 = pygame.key.get_pressed()
+        if keys1[pygame.K_r]:
+            break
+
+#DRAW FUNCTIONS
 #drawing hero movements
 def hero_draw():
     global win
@@ -70,7 +126,6 @@ def hero_draw():
             hero.idleCt += 1
     
     hero.hitbox = (hero.x + 35, hero.y, 56, 120)
-    pygame.draw.rect(win, (255, 0, 0), (hero.hitbox), 2)
     if hero.reloading_visible:
         pygame.draw.rect(win, (0, 255, 0), (hero.hitbox[0], hero.hitbox[1]-20, 50, 10), 10)
         pygame.draw.rect(win, (0, 150, 0), (hero.hitbox[0], hero.hitbox[1]-20, hero.reloading, 10), 10)
@@ -79,18 +134,19 @@ def hero_draw():
 #drawing enemy movements
 def enemy_draw():
     global win
-    if enemy.walkCt +1 >= 64:
-        enemy.walkCt = 0
-    
-    if enemy.left:
-        win.blit(enemy_walkLeft[enemy.walkCt//8], (enemy.x, enemy.y))
-        enemy.walkCt += 1
-    elif enemy.right:
-        win.blit(enemy_walkRight[enemy.walkCt//8], (enemy.x, enemy.y))
-        enemy.walkCt += 1
-    
-    enemy.hitbox = (enemy.x + 45, enemy.y, 52, 120)
-    pygame.draw.rect(win, (255, 0, 0), (enemy.hitbox), 2)
+    for enemy in enemies:
+        if enemy.walkCt +1 >= 64:
+            enemy.walkCt = 0
+        
+        if enemy.direction == 0:
+            win.blit(enemy_walkLeft[enemy.walkCt//8], (enemy.x, enemy.y))
+            enemy.walkCt += 1
+        elif enemy.direction == 1:
+            win.blit(enemy_walkRight[enemy.walkCt//8], (enemy.x, enemy.y))
+            enemy.walkCt += 1
+        
+        enemy.hitbox = (enemy.x + 55, enemy.y, 40, 120)
+        
         
 #knife draw wich of on air
 def knife_draw():
@@ -98,7 +154,7 @@ def knife_draw():
     win.blit(knife_img, (knife.x, knife.y))
     
     knife.hitbox = (knife.x + 12, knife.y + 5, 20, 32)
-    pygame.draw.rect(win, (255, 0, 0), (knife.hitbox), 2)
+    
 
 #draw bullet
 def draw_bullet():
@@ -115,35 +171,53 @@ def re_drawGameWindow():
     draw_bullet()
     
     #scoreboard
-    font = pygame.font.Font('freesansbold.ttf', 24)
-    score_text = font.render("Score: "+ str(score), True, (0,0,0))
+    score_font = pygame.font.Font('freesansbold.ttf', 24)
+    score_text = score_font.render("Score: "+ str(score), True, (0,0,0))
     win.blit(score_text,(10,10))
     
     pygame.display.update()
-    
-'''
-#music
-music_file = './sfx/test.mp3'
-pygame.mixer.init()
-pygame.mixer.music.load(music_file)
-pygame.mixer.music.play(-1) # -1 mean loop indefinetly
-'''
 
 #first knife
 random_x = random.randint(0,WIN_WIDTH)
 knife = Knife(random_x, 0, 10, 32)
 
 #game loop
-hero = Player(50, 500, 128, 128)
-enemy = Enemy(600, 500, 128,128)
+game_timer = 0
+enemy_creation_time = 0
+create_reset_time = 100
+right_or_left = 0
+hero = Player(WIN_WIDTH/2 - 64, 500, 128, 128)
+enemies = []
 bullets = []
 game = True
 while game:
     clock.tick(64) # frame (mean: how many images use per second)
-
+    game_timer += 1
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game = False
+
+    enemy_creation_time += 1
+    if enemy_creation_time == create_reset_time:
+        enemy_creation_time = 0
+    
+    if game_timer == 500:
+        create_reset_time = 50
+    if game_timer == 1000:
+        create_reset_time = 30
+    if game_timer == 2000:
+        create_reset_time = 15
+
+    #create enemy
+    right_or_left = random.randint(0,1)
+    if right_or_left: #this is right side (right_or_left == 1)
+        if enemy_creation_time == 10:
+            enemies.append(Enemy(WIN_WIDTH, 500, 128, 128, 0))
+    else: #this is left side (right_or_left ==0 )
+        if enemy_creation_time == 10:
+            enemies.append(Enemy(0, 500, 128, 128, 1))
+        
 
     #shoot timer (just blocking spamming shoot)
     if hero.reloading > 0:
@@ -151,17 +225,17 @@ while game:
     if hero.reloading > 50:
         hero.reloading_visible = False
         hero.reloading = 0
-        
-        
+                
     #bullet movement
     for bullet in bullets:
-        if bullet.y - bullet.radius < enemy.hitbox[1] + enemy.hitbox[3] and bullet.y + bullet.radius > enemy.hitbox[1]:
-            if bullet.x + bullet.radius > enemy.hitbox[0] and bullet.x - bullet.radius < enemy.hitbox[0] + enemy.hitbox[2]:
-                enemy.hit()
-                score += 1
-                bullets.pop(bullets.index(bullet))
+        for enemy in enemies:
+            if bullet.y - bullet.radius < enemy.hitbox[1] + enemy.hitbox[3] and bullet.y + bullet.radius > enemy.hitbox[1]:
+                if bullet.x + bullet.radius > enemy.hitbox[0] and bullet.x - bullet.radius < enemy.hitbox[0] + enemy.hitbox[2]:
+                    hitsfx.play()
+                    enemies.pop(enemies.index(enemy))
+                    score += 1
+                    bullets.pop(bullets.index(bullet))
                 
-        
         if bullet.x < WIN_WIDTH and bullet.x > 0:
             bullet.x += bullet.velocity * bullet.direction
         else:
@@ -170,6 +244,7 @@ while game:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_q] and hero.reloading == 0:          
+        shootsfx.play()
         if hero.lastKey == "right":
             direction = 1
         else:
@@ -208,26 +283,23 @@ while game:
         random_x = random.randint(0,WIN_WIDTH)
         knife = Knife(random_x, 0, 10, 32)
         
-    #knife hit on player
+    #knife hit player
     if hero.hitbox[1] < knife.hitbox[1] + knife.hitbox[3]:
         if hero.hitbox[0] < knife.hitbox[0] + knife.hitbox[2] and hero.hitbox[0] + hero.hitbox[2] > knife.hitbox[0]:
-            hero.hit_knife()
             knife.hitted = True
+            player_dead()    
     
-    #dying
+    #enemy hit player
+    for enemy in enemies:
+        if hero.hitbox[0] + hero.hitbox[2] > enemy.hitbox[0] and hero.hitbox[0] < enemy.hitbox[0] + enemy.hitbox[2]:
+            player_dead()
+        
 
-    #enemy moving
-    if enemy.x >= 800:
-        enemy.left = True
-        enemy.right = False
-    if enemy.x <= 300:
-        enemy.right = True
-        enemy.left = False
-
-    if enemy.left:
-        enemy.x -= enemy.velocity
-    else:
-        enemy.x += enemy.velocity
+    for enemy in enemies:
+        if enemy.direction == 0:
+            enemy.x -= enemy.velocity
+        else:
+            enemy.x += enemy.velocity
 
 
     re_drawGameWindow()    

@@ -15,9 +15,6 @@ class Player(object):
         self.hitbox = (self.x + 35, self.y, 56, 120)
         self.reloading = 0
         self.reloading_visible = False
-    
-    def hit_knife(self):
-        print("I am dead")
         
 class Knife(object):
     def __init__(self, x, y, width, height):
@@ -30,19 +27,15 @@ class Knife(object):
         self.hitted = False
 
 class Enemy(object):
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, direction):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.velocity = 3
         self.walkCt = 0
-        self.left = True
-        self.right = False
-        self.hitbox = (self.x + 45, self.y, 52, 120)
-    
-    def hit(self):
-        print("yeah")
+        self.direction = direction
+        self.hitbox = (self.x + 35, self.y, 35, 120)
 
 class Bullet(object):
     def __init__(self, x, y, radius, color, direction):
