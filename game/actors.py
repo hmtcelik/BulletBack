@@ -21,7 +21,7 @@ class Knife(object):
         self.width = width
         self.height = height
         self.velocity = 10
-        self.color = (0,0,0)
+        self.hitbox = (self.x + 12, self.y+5, 20, 32)
 
 class Enemy(object):
     def __init__(self, x, y, width, height):

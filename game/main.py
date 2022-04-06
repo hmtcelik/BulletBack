@@ -18,6 +18,7 @@ idleRight = [pygame.image.load('./assets/RIdle1.png'),pygame.image.load('./asset
 idleLeft = [pygame.image.load('./assets/LIdle1.png'),pygame.image.load('./assets/LIdle2.png'),pygame.image.load('./assets/LIdle3.png'),pygame.image.load('./assets/LIdle4.png'),pygame.image.load('./assets/LIdle5.png'),pygame.image.load('./assets/LIdle6.png'),pygame.image.load('./assets/LIdle7.png'),pygame.image.load('./assets/LIdle8.png'),]
 bg_image = pygame.image.load('./assets/bg.jpg')
 hero_image = pygame.image.load('./assets/Mid.png')
+knife_img = pygame.image.load('./assets/knife.png')
 
 #enemy movement
 enemy_walkLeft = [pygame.image.load('./assets/enemy/L1E.png'),pygame.image.load('./assets/enemy/L2E.png'),pygame.image.load('./assets/enemy/L3E.png'),pygame.image.load('./assets/enemy/L4E.png'),pygame.image.load('./assets/enemy/L5E.png'),pygame.image.load('./assets/enemy/L6E.png'),pygame.image.load('./assets/enemy/L7E.png'),pygame.image.load('./assets/enemy/L8E.png'),]
@@ -41,6 +42,8 @@ for i in range(8):
     a += 1
 
 hero_image = pygame.transform.scale(hero_image, (128,128))
+
+knife_img = pygame.transform.rotate(knife_img, 45)
 
 #drawing hero movements
 def hero_draw():
@@ -85,7 +88,11 @@ def enemy_draw():
         
 #knife draw wich of on air
 def knife_draw():
-    pygame.draw.rect(win, knife.color, (knife.x, knife.y, knife.width, knife.height))
+    global win
+    win.blit(knife_img, (knife.x, knife.y))
+    
+    knife.hitbox = (knife.x + 12, knife.y + 5, 20, 32)
+    pygame.draw.rect(win, (255, 0, 0), (knife.hitbox), 2)
 
 #draw bullet
 def draw_bullet():
@@ -162,7 +169,7 @@ while game:
         if len(bullets) < 3:
             bullets.append(Bullet(round(hero.x + hero.width // 2), round(hero.y + hero.height // 2), 6, (0,0,0), direction))
           
-        shootCt = 1      
+        shootCt = 1
     
     if keys[pygame.K_LEFT] and hero.x > 0:
         hero.x -= hero.velocity     # the top and left coordinate is (0,0), if going right; x increase, if going bottom y increase
@@ -178,7 +185,7 @@ while game:
         hero.left = False
         hero.right = False
         hero.walkCt = 0
-    
+        
     if not hero.isAir:
         if keys[pygame.K_UP] and hero.y > 0:
             hero.isAir = True
