@@ -63,7 +63,10 @@ def hero_draw():
         else:
             win.blit(idleLeft[hero.idleCt//8], (hero.x, hero.y))
             hero.idleCt += 1
-            
+    
+    hero.hitbox = (hero.x + 35, hero.y, 56, 120)
+    pygame.draw.rect(win, (255, 0, 0), (hero.hitbox), 2)
+
 #drawing enemy movements
 def enemy_draw():
     global win
@@ -76,6 +79,9 @@ def enemy_draw():
     elif enemy.right:
         win.blit(enemy_walkRight[enemy.walkCt//8], (enemy.x, enemy.y))
         enemy.walkCt += 1
+    
+    enemy.hitbox = (enemy.x + 45, enemy.y, 52, 120)
+    pygame.draw.rect(win, (255, 0, 0), (enemy.hitbox), 2)
         
 #knife draw wich of on air
 def knife_draw():
@@ -118,6 +124,7 @@ knife = Knife(random_x, 0, 10, 32)
 hero = Player(50, 500, 128, 128)
 enemy = Enemy(600, 500, 128,128)
 bullets = []
+shootCt = 0
 game = True
 while game:
     clock.tick(64) # frame (mean: how many images use per second)
@@ -126,24 +133,36 @@ while game:
         if event.type == pygame.QUIT:
             game = False
 
+    #shoot timer (just blocking spamming shoot)
+    if shootCt > 0:
+        shootCt +=1
+    if shootCt > 60:
+        shootCt = 0
+        
     #bullet movement
     for bullet in bullets:
+        if bullet.y - bullet.radius < enemy.hitbox[1] + enemy.hitbox[3] and bullet.y + bullet.radius > enemy.hitbox[1]:
+            if bullet.x + bullet.radius > enemy.hitbox[0] and bullet.x - bullet.radius < enemy.hitbox[0] + enemy.hitbox[2]:
+                enemy.hit()
+                bullets.pop(bullets.index(bullet))
+                
+        
         if bullet.x < WIN_WIDTH and bullet.x > 0:
             bullet.x += bullet.velocity * bullet.direction
         else:
             bullets.pop(bullets.index(bullet))
 
     keys = pygame.key.get_pressed()
- 
-    if keys[pygame.K_q]:          
+
+    if keys[pygame.K_q] and shootCt == 0:          
         if hero.lastKey == "right":
             direction = 1
         else:
             direction = -1
         if len(bullets) < 3:
-            if len(bullets) < 1 :
-                bullets.append(Bullet(round(hero.x + hero.width // 2), round(hero.y + hero.height // 2), 6, (0,0,0), direction))
-                
+            bullets.append(Bullet(round(hero.x + hero.width // 2), round(hero.y + hero.height // 2), 6, (0,0,0), direction))
+          
+        shootCt = 1      
     
     if keys[pygame.K_LEFT] and hero.x > 0:
         hero.x -= hero.velocity     # the top and left coordinate is (0,0), if going right; x increase, if going bottom y increase
