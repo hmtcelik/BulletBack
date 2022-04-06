@@ -1,5 +1,5 @@
 import pygame, sys, random, time
-from classes import Bullet, Enemy, Player, Knife
+from data.classes import Bullet, Enemy, Player, Knife
 
 pygame.init()
 
@@ -7,20 +7,20 @@ WIN_HEGIHT = 720
 WIN_WIDTH = 1280
 win = pygame.display.set_mode((WIN_WIDTH,WIN_HEGIHT))
 
-pygame.display.set_caption("Airblade")
+pygame.display.set_caption("BulletBack (1.0)")
 
 #importing images
-walkRight = [pygame.image.load('./assets/R1.png'), pygame.image.load('./assets/R2.png'), pygame.image.load('./assets/R3.png'), pygame.image.load('./assets/R4.png'), pygame.image.load('./assets/R5.png'), pygame.image.load('./assets/R6.png'), pygame.image.load('./assets/R7.png'), pygame.image.load('./assets/R8.png')]
-walkLeft = [pygame.image.load('./assets/L1.png'), pygame.image.load('./assets/L2.png'), pygame.image.load('./assets/L3.png'), pygame.image.load('./assets/L4.png'), pygame.image.load('./assets/L5.png'), pygame.image.load('./assets/L6.png'), pygame.image.load('./assets/L7.png'), pygame.image.load('./assets/L8.png')]
-idleRight = [pygame.image.load('./assets/RIdle1.png'),pygame.image.load('./assets/RIdle2.png'),pygame.image.load('./assets/RIdle3.png'),pygame.image.load('./assets/RIdle4.png'),pygame.image.load('./assets/RIdle5.png'),pygame.image.load('./assets/RIdle5.png'),pygame.image.load('./assets/RIdle7.png'),pygame.image.load('./assets/RIdle8.png'),]
-idleLeft = [pygame.image.load('./assets/LIdle1.png'),pygame.image.load('./assets/LIdle2.png'),pygame.image.load('./assets/LIdle3.png'),pygame.image.load('./assets/LIdle4.png'),pygame.image.load('./assets/LIdle5.png'),pygame.image.load('./assets/LIdle6.png'),pygame.image.load('./assets/LIdle7.png'),pygame.image.load('./assets/LIdle8.png'),]
-bg_image = pygame.image.load('./assets/bg.jpg')
-hero_image = pygame.image.load('./assets/Mid.png')
-knife_img = pygame.image.load('./assets/knife.png')
+walkRight = [pygame.image.load('./data/assets/R1.png'), pygame.image.load('./data/assets/R2.png'), pygame.image.load('./data/assets/R3.png'), pygame.image.load('./data/assets/R4.png'), pygame.image.load('./data/assets/R5.png'), pygame.image.load('./data/assets/R6.png'), pygame.image.load('./data/assets/R7.png'), pygame.image.load('./data/assets/R8.png')]
+walkLeft = [pygame.image.load('./data/assets/L1.png'), pygame.image.load('./data/assets/L2.png'), pygame.image.load('./data/assets/L3.png'), pygame.image.load('./data/assets/L4.png'), pygame.image.load('./data/assets/L5.png'), pygame.image.load('./data/assets/L6.png'), pygame.image.load('./data/assets/L7.png'), pygame.image.load('./data/assets/L8.png')]
+idleRight = [pygame.image.load('./data/assets/RIdle1.png'),pygame.image.load('./data/assets/RIdle2.png'),pygame.image.load('./data/assets/RIdle3.png'),pygame.image.load('./data/assets/RIdle4.png'),pygame.image.load('./data/assets/RIdle5.png'),pygame.image.load('./data/assets/RIdle5.png'),pygame.image.load('./data/assets/RIdle7.png'),pygame.image.load('./data/assets/RIdle8.png'),]
+idleLeft = [pygame.image.load('./data/assets/LIdle1.png'),pygame.image.load('./data/assets/LIdle2.png'),pygame.image.load('./data/assets/LIdle3.png'),pygame.image.load('./data/assets/LIdle4.png'),pygame.image.load('./data/assets/LIdle5.png'),pygame.image.load('./data/assets/LIdle6.png'),pygame.image.load('./data/assets/LIdle7.png'),pygame.image.load('./data/assets/LIdle8.png'),]
+bg_image = pygame.image.load('./data/assets/bg.jpg')
+hero_image = pygame.image.load('./data/assets/Mid.png')
+knife_img = pygame.image.load('./data/assets/knife.png')
 
 #enemy movement
-enemy_walkLeft = [pygame.image.load('./assets/enemy/L1E.png'),pygame.image.load('./assets/enemy/L2E.png'),pygame.image.load('./assets/enemy/L3E.png'),pygame.image.load('./assets/enemy/L4E.png'),pygame.image.load('./assets/enemy/L5E.png'),pygame.image.load('./assets/enemy/L6E.png'),pygame.image.load('./assets/enemy/L7E.png'),pygame.image.load('./assets/enemy/L8E.png'),]
-enemy_walkRight = [pygame.image.load('./assets/enemy/R1E.png'),pygame.image.load('./assets/enemy/R2E.png'),pygame.image.load('./assets/enemy/R3E.png'),pygame.image.load('./assets/enemy/R4E.png'),pygame.image.load('./assets/enemy/R5E.png'),pygame.image.load('./assets/enemy/R6E.png'),pygame.image.load('./assets/enemy/R7E.png'),pygame.image.load('./assets/enemy/R8E.png'),]
+enemy_walkLeft = [pygame.image.load('./data/assets/enemy/L1E.png'),pygame.image.load('./data/assets/enemy/L2E.png'),pygame.image.load('./data/assets/enemy/L3E.png'),pygame.image.load('./data/assets/enemy/L4E.png'),pygame.image.load('./data/assets/enemy/L5E.png'),pygame.image.load('./data/assets/enemy/L6E.png'),pygame.image.load('./data/assets/enemy/L7E.png'),pygame.image.load('./data/assets/enemy/L8E.png'),]
+enemy_walkRight = [pygame.image.load('./data/assets/enemy/R1E.png'),pygame.image.load('./data/assets/enemy/R2E.png'),pygame.image.load('./data/assets/enemy/R3E.png'),pygame.image.load('./data/assets/enemy/R4E.png'),pygame.image.load('./data/assets/enemy/R5E.png'),pygame.image.load('./data/assets/enemy/R6E.png'),pygame.image.load('./data/assets/enemy/R7E.png'),pygame.image.load('./data/assets/enemy/R8E.png'),]
 
 clock = pygame.time.Clock()
 
@@ -52,9 +52,9 @@ pygame.mixer.init()
 pygame.mixer.music.load(music_file)
 pygame.mixer.music.play(-1) # -1 mean loop indefinetly
 '''
-shootsfx = pygame.mixer.Sound('./sfx/shoot.wav')
-hitsfx = pygame.mixer.Sound('./sfx/hit.wav')
-deadsfx = pygame.mixer.Sound('./sfx/dead.wav')
+shootsfx = pygame.mixer.Sound('./data/sfx/shoot.wav')
+hitsfx = pygame.mixer.Sound('./data/sfx/hit.wav')
+deadsfx = pygame.mixer.Sound('./data/sfx/dead.wav')
 
 #score
 score = 0
