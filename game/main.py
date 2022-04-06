@@ -1,7 +1,5 @@
-from tkinter.tix import Tree
-from numpy import False_
 import pygame, sys, random, time
-from actors import Bullet, Enemy, Player, Knife
+from classes import Bullet, Enemy, Player, Knife
 
 pygame.init()
 
@@ -115,13 +113,13 @@ def re_drawGameWindow():
     
     pygame.display.update()
     
-#music
 '''
+#music
 music_file = './sfx/test.mp3'
 pygame.mixer.init()
 pygame.mixer.music.load(music_file)
 pygame.mixer.music.play(-1) # -1 mean loop indefinetly
-''' 
+'''
 
 #first knife
 random_x = random.randint(0,WIN_WIDTH)
@@ -185,34 +183,28 @@ while game:
         hero.left = False
         hero.right = False
         hero.walkCt = 0
-        
-    if not hero.isAir:
-        if keys[pygame.K_UP] and hero.y > 0:
-            hero.isAir = True
-            hero.left = False
-            hero.right = False
-            hero.walkCt = 0
-    elif hero.isAir:
-        if hero.airCount >= -10:
-            if hero.airCount > 0:
-                negative = 1
-            else:
-                negative = -1
-            hero.y -= (hero.airCount ** 2) / 2 * negative  # momentum of jump
-            hero.airCount -= 1
-        else:
-            hero.isAir = False
-            hero.airCount = 10
             
     #droping knife on air
     if knife.y > 570:  
         random_x = random.randint(0,WIN_WIDTH)
         knife = Knife(random_x, 0, 10, 32)
-    knife.y += knife.velocity #moving knife
+    
+    #moving knife if isnt hitted to player
+    if not knife.hitted:
+        knife.y += knife.velocity
+    else:
+        random_x = random.randint(0,WIN_WIDTH)
+        knife = Knife(random_x, 0, 10, 32)
+        
+    #knife hit on player
+    if hero.hitbox[1] < knife.hitbox[1] + knife.hitbox[3]:
+        if hero.hitbox[0] < knife.hitbox[0] + knife.hitbox[2] and hero.hitbox[0] + hero.hitbox[2] > knife.hitbox[0]:
+            hero.hit_knife()
+            knife.hitted = True
     
     #dying
 
-        
+    #enemy moving
     if enemy.x >= 800:
         enemy.left = True
         enemy.right = False

@@ -13,6 +13,9 @@ class Player(object):
         self.idleCt = 0
         self.lastKey = "right"
         self.hitbox = (self.x + 35, self.y, 56, 120)
+    
+    def hit_knife(self):
+        print("I am dead")
         
 class Knife(object):
     def __init__(self, x, y, width, height):
@@ -22,6 +25,7 @@ class Knife(object):
         self.height = height
         self.velocity = 10
         self.hitbox = (self.x + 12, self.y+5, 20, 32)
+        self.hitted = False
 
 class Enemy(object):
     def __init__(self, x, y, width, height):
@@ -38,8 +42,6 @@ class Enemy(object):
     def hit(self):
         print("yeah")
 
-
-        
 class Bullet(object):
     def __init__(self, x, y, radius, color, direction):
         self.x = x
