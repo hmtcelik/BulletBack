@@ -76,6 +76,8 @@ def player_dead():
     enemy_creation_time = 0
     create_reset_time = 100
     right_or_left = 0
+    hero.reloading = 0
+    hero.reloading_visible = False
     while True: #changing color press R text 
         if i > 0 and i < 200:
             restart_font = pygame.font.Font('freesansbold.ttf', 30)
@@ -129,7 +131,7 @@ def hero_draw():
     if hero.reloading_visible:
         pygame.draw.rect(win, (0, 255, 0), (hero.hitbox[0], hero.hitbox[1]-20, 50, 10), 10)
         pygame.draw.rect(win, (0, 150, 0), (hero.hitbox[0], hero.hitbox[1]-20, hero.reloading, 10), 10)
-
+    pygame.draw.rect(win, (255,0,0), hero.hitbox, 2)
 
 #drawing enemy movements
 def enemy_draw():
@@ -146,6 +148,7 @@ def enemy_draw():
             enemy.walkCt += 1
         
         enemy.hitbox = (enemy.x + 55, enemy.y, 40, 120)
+
         
         
 #knife draw wich of on air
@@ -217,7 +220,6 @@ while game:
     else: #this is left side (right_or_left ==0 )
         if enemy_creation_time == 10:
             enemies.append(Enemy(0, 500, 128, 128, 1))
-        
 
     #shoot timer (just blocking spamming shoot)
     if hero.reloading > 0:
