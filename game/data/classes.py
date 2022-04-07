@@ -13,8 +13,10 @@ class Player(object):
         self.idleCt = 0
         self.lastKey = "right"
         self.hitbox = (self.x + 35, self.y, 56, 120)
-        self.reloading = 0
+        self.reloadingCt = 0
         self.reloading_visible = False
+        self.reloading_time = 50
+        self.level = 1
         
 class Knife(object):
     def __init__(self, x, y, width, height):

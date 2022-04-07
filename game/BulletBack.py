@@ -1,3 +1,4 @@
+from imp import reload
 import pygame, sys, random, time
 from data.classes import Bullet, Enemy, Player, Knife
 
@@ -55,6 +56,7 @@ pygame.mixer.music.play(-1) # -1 mean loop indefinetly
 shootsfx = pygame.mixer.Sound('./data/sfx/shoot.wav')
 hitsfx = pygame.mixer.Sound('./data/sfx/hit.wav')
 deadsfx = pygame.mixer.Sound('./data/sfx/dead.wav')
+levelupsfx = pygame.mixer.Sound('./data/sfx/levelup.mp3')
 
 #score
 score = 0
@@ -76,8 +78,9 @@ def player_dead():
     enemy_creation_time = 0
     create_reset_time = 100
     right_or_left = 0
-    hero.reloading = 0
+    hero.reloadingCt = 0
     hero.reloading_visible = False
+    laugh_to_player = 0
     #check highscore
     if not high_score > score:
         high_score = score
@@ -131,9 +134,10 @@ def hero_draw():
             hero.idleCt += 1
     
     hero.hitbox = (hero.x + 35, hero.y, 56, 120)
+    
     if hero.reloading_visible:
-        pygame.draw.rect(win, (0, 255, 0), (hero.hitbox[0], hero.hitbox[1]-20, 50, 10), 10)
-        pygame.draw.rect(win, (0, 150, 0), (hero.hitbox[0], hero.hitbox[1]-20, hero.reloading, 10), 10)
+        pygame.draw.rect(win, (0, 255, 0), (hero.hitbox[0] + (50-hero.reloading_time)/2, hero.hitbox[1]-20, hero.reloading_time, 10), 10)
+        pygame.draw.rect(win, (0, 150, 0), (hero.hitbox[0] + (50-hero.reloading_time)/2, hero.hitbox[1]-20, hero.reloadingCt, 10), 10)
 
 #drawing enemy movements
 def enemy_draw():
@@ -151,8 +155,7 @@ def enemy_draw():
         
         enemy.hitbox = (enemy.x + 55, enemy.y, 40, 120)
 
-        
-        
+  
 #knife draw wich of on air
 def knife_draw():
     global win
@@ -160,12 +163,17 @@ def knife_draw():
     
     knife.hitbox = (knife.x + 12, knife.y + 5, 20, 32)
     
-
 #draw bullet
 def draw_bullet():
     global win
     for bullet in bullets:
         pygame.draw.circle(win, bullet.color, (bullet.x, bullet.y), bullet.radius)    
+
+def draw_level():
+    global win
+    level_font = pygame.font.Font(None, 35)
+    level_text = level_font.render("Level "+ str(hero.level), True, (0,0,0))
+    win.blit(level_text, (hero.x + 20, hero.y - 50))
 
 #main draw func
 def re_drawGameWindow():        
@@ -174,6 +182,7 @@ def re_drawGameWindow():
     enemy_draw()
     knife_draw() 
     draw_bullet()
+    draw_level()
     
     #scoreboard
     score_font = pygame.font.Font(None, 35)
@@ -182,6 +191,12 @@ def re_drawGameWindow():
     high_score_font = pygame.font.Font(None, 35)
     high_score_text = high_score_font.render("High Score: "+ str(high_score), True, (0,0,0)) 
     win.blit(high_score_text, (10,10))
+    
+    #laugh_to_player
+    if laugh_to_player:
+        laugh_font = pygame.font.Font(None, 80) 
+        laugh_text = laugh_font.render(":D", True, (0,0,0))
+        win.blit(laugh_text, ((WIN_WIDTH /2)-(laugh_text.get_width()/2), 100 )) #(x,y)
     
     pygame.display.update()
 
@@ -199,6 +214,8 @@ enemies = []
 bullets = []
 game = True
 high_score = 0
+one = [1,1,1,1] #for level sfx
+laugh_to_player = 0
 while game:
     clock.tick(64) # frame (mean: how many images use per second)
     game_timer += 1
@@ -211,12 +228,38 @@ while game:
     if enemy_creation_time == create_reset_time:
         enemy_creation_time = 0
     
+    #player level
+    if score == 0:
+        hero.level = 1
+        hero.reloading_time = 50
+    if score == 5:
+        if one[0]:
+            levelupsfx.play()
+            one[0] = 0
+        hero.level = 2
+        hero.reloading_time = 40
+    if score == 10:
+        if one[1]:
+            levelupsfx.play()
+            one[1] = 0        
+        hero.level = 3
+        hero.reloading_time = 30
+    if score == 15:
+        if one[2]:
+            levelupsfx.play()
+            one[2] = 0        
+        hero.level = 4
+        hero.reloading_time =  20
+
+    
+    #game diffuculty
     if game_timer == 500:
         create_reset_time = 50
     if game_timer == 1000:
         create_reset_time = 30
     if game_timer == 2000:
-        create_reset_time = 15
+        laugh_to_player = 1
+        create_reset_time = 11
 
     #create enemy
     right_or_left = random.randint(0,1)
@@ -228,11 +271,11 @@ while game:
             enemies.append(Enemy(0, 500, 128, 128, 1))
 
     #shoot timer (just blocking spamming shoot)
-    if hero.reloading > 0:
-        hero.reloading +=1
-    if hero.reloading > 50:
+    if hero.reloadingCt > 0:
+        hero.reloadingCt +=1
+    if hero.reloadingCt > hero.reloading_time:
         hero.reloading_visible = False
-        hero.reloading = 0
+        hero.reloadingCt = 0
                 
     #bullet movement
     for bullet in bullets:
@@ -247,11 +290,12 @@ while game:
         if bullet.x < WIN_WIDTH and bullet.x > 0:
             bullet.x += bullet.velocity * bullet.direction
         else:
-            bullets.pop(bullets.index(bullet))
+            if bullet in bullets:
+                bullets.pop(bullets.index(bullet))
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_q] and hero.reloading == 0:          
+    if keys[pygame.K_q] and hero.reloadingCt == 0:          
         shootsfx.play()
         if hero.lastKey == "right":
             direction = 1
@@ -261,7 +305,7 @@ while game:
             bullets.append(Bullet(round(hero.x + hero.width // 2), round(hero.y + hero.height // 2), 6, (0,0,0), direction))
         
         hero.reloading_visible = True  
-        hero.reloading = 1
+        hero.reloadingCt = 1
         
     
     if keys[pygame.K_LEFT] and hero.x > 0:
