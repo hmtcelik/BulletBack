@@ -61,11 +61,11 @@ score = 0
 
 #restart the game
 def player_dead():
-    global win, score, game_timer, enemy_creation_time, create_reset_time, right_or_left
+    global win, score, game_timer, enemy_creation_time, create_reset_time, right_or_left, high_score
     hero.x = WIN_WIDTH/2 - hero.width /2
     hero.y = 500
     hero.walkCt = 0
-    score_font = pygame.font.Font('freesansbold.ttf', 60) 
+    score_font = pygame.font.Font(None, 80) 
     score_text_on_restart = score_font.render("Your Score: " + str(score), True, (0,0,0))
     win.blit(score_text_on_restart, ((WIN_WIDTH /2)-(score_text_on_restart.get_width()/2), 200 )) #(x,y) 
     i = 0
@@ -78,13 +78,16 @@ def player_dead():
     right_or_left = 0
     hero.reloading = 0
     hero.reloading_visible = False
+    #check highscore
+    if not high_score > score:
+        high_score = score
     while True: #changing color press R text 
         if i > 0 and i < 200:
-            restart_font = pygame.font.Font('freesansbold.ttf', 30)
+            restart_font = pygame.font.Font(None, 40)
             restart_text = restart_font.render("Press 'R' to restart", True, (0,0,0))
             win.blit(restart_text, ((WIN_WIDTH /2)-(restart_text.get_width()/2), 270 )) #(x,y)
         else:
-            restart_font = pygame.font.Font('freesansbold.ttf', 30)
+            restart_font = pygame.font.Font(None, 40)
             restart_text = restart_font.render("Press 'R' to restart", True, (255,255,255))
             win.blit(restart_text, ((WIN_WIDTH /2)-(restart_text.get_width()/2), 270 )) #(x,y)
             
@@ -131,7 +134,6 @@ def hero_draw():
     if hero.reloading_visible:
         pygame.draw.rect(win, (0, 255, 0), (hero.hitbox[0], hero.hitbox[1]-20, 50, 10), 10)
         pygame.draw.rect(win, (0, 150, 0), (hero.hitbox[0], hero.hitbox[1]-20, hero.reloading, 10), 10)
-    pygame.draw.rect(win, (255,0,0), hero.hitbox, 2)
 
 #drawing enemy movements
 def enemy_draw():
@@ -174,9 +176,12 @@ def re_drawGameWindow():
     draw_bullet()
     
     #scoreboard
-    score_font = pygame.font.Font('freesansbold.ttf', 24)
+    score_font = pygame.font.Font(None, 35)
     score_text = score_font.render("Score: "+ str(score), True, (0,0,0))
-    win.blit(score_text,(10,10))
+    win.blit(score_text,(10,45))
+    high_score_font = pygame.font.Font(None, 35)
+    high_score_text = high_score_font.render("High Score: "+ str(high_score), True, (0,0,0)) 
+    win.blit(high_score_text, (10,10))
     
     pygame.display.update()
 
@@ -193,6 +198,7 @@ hero = Player(WIN_WIDTH/2 - 64, 500, 128, 128)
 enemies = []
 bullets = []
 game = True
+high_score = 0
 while game:
     clock.tick(64) # frame (mean: how many images use per second)
     game_timer += 1
