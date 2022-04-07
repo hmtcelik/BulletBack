@@ -63,7 +63,7 @@ score = 0
 
 #restart the game
 def player_dead():
-    global win, score, game_timer, enemy_creation_time, create_reset_time, right_or_left, high_score
+    global win, score, game_timer, enemy_creation_time, create_reset_time, right_or_left, high_score, laugh_to_player
     hero.x = WIN_WIDTH/2 - hero.width /2
     hero.y = 500
     hero.walkCt = 0
@@ -238,13 +238,13 @@ while game:
             one[0] = 0
         hero.level = 2
         hero.reloading_time = 40
-    if score == 10:
+    if score == 15:
         if one[1]:
             levelupsfx.play()
             one[1] = 0        
         hero.level = 3
         hero.reloading_time = 30
-    if score == 15:
+    if score == 25:
         if one[2]:
             levelupsfx.play()
             one[2] = 0        
