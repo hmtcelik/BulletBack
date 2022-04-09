@@ -23,6 +23,9 @@ knife_img = pygame.image.load('./data/assets/knife.png')
 enemy_walkLeft = [pygame.image.load('./data/assets/enemy/L1E.png'),pygame.image.load('./data/assets/enemy/L2E.png'),pygame.image.load('./data/assets/enemy/L3E.png'),pygame.image.load('./data/assets/enemy/L4E.png'),pygame.image.load('./data/assets/enemy/L5E.png'),pygame.image.load('./data/assets/enemy/L6E.png'),pygame.image.load('./data/assets/enemy/L7E.png'),pygame.image.load('./data/assets/enemy/L8E.png'),]
 enemy_walkRight = [pygame.image.load('./data/assets/enemy/R1E.png'),pygame.image.load('./data/assets/enemy/R2E.png'),pygame.image.load('./data/assets/enemy/R3E.png'),pygame.image.load('./data/assets/enemy/R4E.png'),pygame.image.load('./data/assets/enemy/R5E.png'),pygame.image.load('./data/assets/enemy/R6E.png'),pygame.image.load('./data/assets/enemy/R7E.png'),pygame.image.load('./data/assets/enemy/R8E.png'),]
 
+#play button
+play_img = pygame.image.load('./data/assets/playbutton.png')
+
 clock = pygame.time.Clock()
 
 
@@ -175,6 +178,29 @@ def draw_level():
     level_text = level_font.render("Level "+ str(hero.level), True, (0,0,0))
     win.blit(level_text, (hero.x + 20, hero.y - 50))
 
+def main_menu():
+    global win, game, mainmenu, bg_image, WIN_WIDTH, WIN_HEGIHT
+    p_button_width = 350
+    p_button_height = 100
+    p_button_x =   WIN_WIDTH/2-p_button_width/2
+    p_button_y = WIN_HEGIHT/2-p_button_height/2
+    p_button = pygame.Rect(p_button_x, p_button_y, p_button_width, p_button_height)
+    while mainmenu:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                if p_button.collidepoint(pos):
+                    mainmenu = 0
+            win.blit(bg_image, (0,0))
+            pygame.draw.rect(win, (0,0,0), (p_button_x , p_button_y , p_button_width, p_button_height))
+            play_font = pygame.font.Font(None, 100)
+            play_text = play_font.render("Play", True, (255,255,255))
+            win.blit(play_text, (p_button_x + play_text.get_width()/1.5, p_button_y + play_text.get_height()/4))
+            pygame.display.update()
+                    
 #main draw func
 def re_drawGameWindow():        
     win.blit(bg_image, (0,0))
@@ -216,7 +242,11 @@ game = True
 high_score = 0
 one = [1,1,1,1] #for level sfx
 laugh_to_player = 0
+mainmenu = 1
 while game:
+    if mainmenu:
+        main_menu()
+    
     clock.tick(64) # frame (mean: how many images use per second)
     game_timer += 1
     
@@ -353,8 +383,7 @@ while game:
         else:
             enemy.x += enemy.velocity
 
-
-    re_drawGameWindow()    
+    re_drawGameWindow()  
     
 pygame.quit()
 sys.exit()
