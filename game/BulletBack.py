@@ -199,6 +199,9 @@ def main_menu():
             play_font = pygame.font.Font(None, 100)
             play_text = play_font.render("Play", True, (255,255,255))
             win.blit(play_text, (p_button_x + play_text.get_width()/1.5, p_button_y + play_text.get_height()/4))
+            name_font = pygame.font.Font(None, 130)
+            name_text = name_font.render("BulletBack", True, (0,0,0))
+            win.blit(name_text, (WIN_WIDTH/2-name_text.get_width()/2 ,WIN_HEGIHT/6-name_text.get_height()/4))
             pygame.display.update()
                     
 #main draw func
@@ -337,7 +340,6 @@ while game:
         hero.reloading_visible = True  
         hero.reloadingCt = 1
         
-    
     if keys[pygame.K_LEFT] and hero.x > 0:
         hero.x -= hero.velocity     # the top and left coordinate is (0,0), if going right; x increase, if going bottom y increase
         hero.left = True
